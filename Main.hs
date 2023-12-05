@@ -1,6 +1,5 @@
-import Data.List
-
-data Cell = Cell {xCoord::Integer, yCoord::Integer, isAlive::Bool} deriving (Eq, Show)
+import GoLAlgorithm
+import Cell
 
 board:: [Cell]
 -- for testing : delete later
@@ -8,41 +7,13 @@ board = [
     Cell 0 0 True,
     Cell 0 1 True, 
     Cell 0 2 True]
+main :: IO ()
 
-gameOfLife:: [Cell] -> [Cell]
-gameOfLife [] = []
-gameOfLife list = step (nub (removeDeadTwins (createBigCellList list)))
+main = do
+  putStrLn (displayBoard board (-10, -10) (20, 20))
 
-step:: [Cell] -> [Cell]
-step cellList = [ Cell{xCoord=x, yCoord=y, isAlive= True} | (Cell x y iA) <- cellList, if iA then 
-                                                                                                let count = countSourroundingAliveCells (x,y) cellList in count>=2 && count<=3  
-                                                                                            else  
-                                                                                                let count = countSourroundingAliveCells (x,y) cellList in count==3]
- 
-countSourroundingAliveCells:: (Integer, Integer) -> [Cell] -> Integer
-countSourroundingAliveCells (_, _) [] = 0
-countSourroundingAliveCells (myX, myY) ((Cell theirX theirY theirIsAlive):rest)
-            | not theirIsAlive = countSourroundingAliveCells (myX,myY) rest
-            | (abs (myX-theirX) <= 1 && abs (myY-theirY) <= 1) && (myX /= theirX || myY /= theirY) = 1 + countSourroundingAliveCells (myX,myY) rest
-            | otherwise = countSourroundingAliveCells (myX,myY) rest
- 
--- Create a list containing every cell that is alive and every dead cell neighbouring an alive cell including a copy of every original cell with isAlive=False
-createBigCellList:: [Cell] -> [Cell]
-createBigCellList [] = []
-createBigCellList (cell:rest) = neighbours cell ++ createBigCellList rest
-    where neighbours :: Cell -> [Cell]
-          neighbours (Cell originX originY _) =
-            Cell{xCoord= originX, yCoord= originY, isAlive= True}:[Cell{xCoord=originX+x, yCoord=originY+y, isAlive=False}  | x<-[-1..1], y<-[-1..1]]
-            
--- If two cells share the same coordinates, but one of them alive, the dead one is deleted
-removeDeadTwins :: [Cell] -> [Cell]
-removeDeadTwins [] = []
-removeDeadTwins originalList = [cell | cell <- originalList, listDoesNotContainAliveTwin cell originalList]
 
--- True if a list of cells doesnt contain another cell at the same coordinates that is alive
-listDoesNotContainAliveTwin :: Cell -> [Cell] -> Bool
-listDoesNotContainAliveTwin _ [] = True
-listDoesNotContainAliveTwin (Cell _ _ True) _ = True
-listDoesNotContainAliveTwin cell (x:xs) = isNotAliveTwin cell x && listDoesNotContainAliveTwin cell xs
-    where isNotAliveTwin :: Cell -> Cell -> Bool
-          isNotAliveTwin (Cell myX myY _) (Cell theirX theirY theirAlive) = not (myX == theirX && myY == theirY && theirAlive)
+displayBoard :: [Cell] -> (Integer, Integer) -> (Integer, Integer) -> String
+displayBoard cl (x,y) (height, width) = concat [ (concat [getTileFill (xco, yco) | xco <- [x..(x+width)]]) ++ "\n" | yco <- [y..(y+height)] ]
+    where getTileFill :: (Integer, Integer) -> String
+          getTileFill (xTF,yTF) = if Cell xTF yTF True `elem` cl then "██" else "░░"
