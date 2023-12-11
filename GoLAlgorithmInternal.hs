@@ -2,12 +2,13 @@ module GoLAlgorithmInternal where
 
 import Data.List
 import Cell
+import RuleSet
 
-step:: [Cell] -> [Cell]
-step cellList = [ Cell{xCoord=x, yCoord=y, isAlive= True} | (Cell x y iA) <- cellList, if iA then 
-                                                                                                let count = countSourroundingAliveCells (x,y) cellList in count>=2 && count<=3  
+step:: [Cell] -> RuleSet -> [Cell]
+step cellList (RuleSet al sl) = [ Cell{xCoord=x, yCoord=y, isAlive= True} | (Cell x y iA) <- cellList, if iA then 
+                                                                                                let count = countSourroundingAliveCells (x,y) cellList in count `elem` al
                                                                                             else  
-                                                                                                let count = countSourroundingAliveCells (x,y) cellList in count==3]
+                                                                                                let count = countSourroundingAliveCells (x,y) cellList in count `elem` sl]
  
 countSourroundingAliveCells:: (Integer, Integer) -> [Cell] -> Integer
 countSourroundingAliveCells (_, _) [] = 0

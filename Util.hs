@@ -1,6 +1,13 @@
 module Util where
 
 import Cell
+import RuleSet
+
+createRuleSetFromString:: String -> RuleSet
+createRuleSetFromString input = RuleSet (map (read :: String -> Integer) (words aliveString)) (map (read :: String -> Integer) (words spawnString))
+  where
+    aliveString = head(splitOn (=='\n') input)
+    spawnString = last(splitOn (=='\n') input)
 
 createBoardFromString:: String -> [Cell] 
 createBoardFromString inString = [  let x = read (head (splitOn (=='|') word))::Integer

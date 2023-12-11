@@ -15,7 +15,7 @@ playRound cl = do
 
 playIRounds :: (Num t, Eq t) => [Cell] -> t -> String
 playIRounds cl 0 = displayBoard cl (-25, -25) (50, 50)
-playIRounds cl i = playIRounds (gameOfLife cl) (i-1)
+playIRounds cl i = playIRounds (gameOfLife cl (createRuleSetFromString "2 3\n3")) (i-1)
 
 
 
