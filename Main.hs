@@ -3,15 +3,12 @@ import Cell
 import System.IO
 import Util
 import Data.List
-import Data.Char (isSpace)
+import System.Exit
 
-
-rstrip :: [Char] -> [Char]
-rstrip = reverse . dropWhile isSpace . reverse
 
 main :: IO ()
 main = do
-    putStrLn "Main Menu:\n1: Play with default board\n2: Load board to play\n3: Create custom board"
+    putStrLn "Main Menu:\n1: Play with default board\n2: Load board to play\n3: Create custom board\n4: Quit"
     choice <- getLine
     runMode choice
 
@@ -20,11 +17,12 @@ runMode s
     | s == "1" = playBoard "boards/board1.txt"
     | s == "2" = getBoardName
     | s == "3" = buildBoardFromCli [] ""
+    | s == "4" = (exitWith ExitSuccess)
 
 playBoard:: String -> IO()
 playBoard s = do
     contents <- readFile s
-    playRound (createBoardFromString contents)
+    playRound (createBoardFromString contents) (-25, -25) (50, 50)
 
 getBoardName:: IO()
 getBoardName = do
@@ -39,7 +37,7 @@ buildBoardFromCli l "quit" = do
     writeFile ("boards/"++filename++".txt") (convertBoardToSaveString l)
     main
 buildBoardFromCli l "" = do
-    putStrLn (displayBoard l (-25, -25) (50, 50))
+    putStrLn (boardToString l (-25, -25) (50, 50))
     putStrLn "Type 'quit' to quit or Enter coordinates in format: x y"
     text <- getLine
     buildBoardFromCli l text
@@ -47,26 +45,20 @@ buildBoardFromCli l str = let x = read (head (words str))::Integer
                               y = read (last (words str))::Integer in
                               buildBoardFromCli (removeDuplicates (Cell x y True :l)) ""
 
-convertBoardToSaveString:: [Cell] -> String
-convertBoardToSaveString = concatMap convertCellToSaveString
 
-convertCellToSaveString:: Cell -> String
-convertCellToSaveString (Cell originX originY _) = show originX ++ "|" ++ show originY ++ " "
-
-removeDuplicates :: Eq a => [a] -> [a]
-removeDuplicates l = [x | x<-l, count x l ==1]
-  where
-    count:: Eq a =>a -> [a] -> Int
-    count x = length . filter (== x)
-
-playRound:: [Cell] -> IO ()
-playRound cl = do
-    putStrLn (displayBoard cl (-25, -25) (50, 50))
+playRound:: [Cell] -> (Integer, Integer) -> (Integer, Integer) -> IO ()
+playRound cl (xco, yco) (width, height)= do
+    putStrLn (boardToString cl (xco, yco) (width, height))
     input <- getLine
-    playRound (gameOfLife cl)
+    handleRoundInput cl (xco, yco) (width, height) input
 
-displayBoard :: [Cell] -> (Integer, Integer) -> (Integer, Integer) -> String
-displayBoard cl (x,y) (height, width) = concat [ (concat [getTileFill (xco, yco) | xco <- [x..(x+width-1)]]) ++ "\n" | yco <- [y..(y+height-1)] ]
-    where getTileFill :: (Integer, Integer) -> String
-          getTileFill (xTF,yTF) = if Cell xTF yTF True `elem` cl then "██" else "░░"
-
+handleRoundInput::[Cell] -> (Integer, Integer) -> (Integer, Integer) -> String -> IO()
+handleRoundInput cl (xco, yco) (width, height) input
+    | input == "quit" = main
+    | (input == "w" || input ==  "up") = playRound cl (xco, yco-5) (width, height)
+    | (input == "s" || input ==  "down") = playRound cl (xco, yco+5) (width, height)
+    | (input == "a" || input ==  "left") = playRound cl (xco-5, yco) (width, height)
+    | (input == "d" || input ==  "right") = playRound cl (xco+5, yco) (width, height)
+    | (input == "+" || input ==  "in") && width >=15 = playRound cl (xco+2, yco+2) (width-4, height-4)
+    | (input == "-" || input ==  "out") = playRound cl (xco-2, yco-2) (width+4, height+4)
+    | otherwise = playRound (gameOfLife cl) (xco, yco) (width, height)
