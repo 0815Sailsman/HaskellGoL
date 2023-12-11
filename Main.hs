@@ -18,7 +18,7 @@ main = do
 -- Menu Function. Gets passed the user's menu choice and calls the corresponding function for that menu point.
 runMode:: String -> IO ()
 runMode s
-    | s == "1" = playBoardWithRuleSet "boards/board1.txt"
+    | s == "1" = playBoardWithRuleSet "boards/defaultBoard.txt"
     | s == "2" = getBoardName
     | s == "3" = buildBoardFromCli [] ""
     | s == "4" = buildRuleSetFromCli
