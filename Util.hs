@@ -39,6 +39,7 @@ removeDuplicates l = [x | x<-l, count x l ==1]
 
 
 boardToString :: [Cell] -> (Integer, Integer) -> (Integer, Integer) -> String
-boardToString cl (x,y) (height, width) = concat [ (concat [getTileFill (xco, yco) | xco <- [x..(x+width-1)]]) ++ "\n" | yco <- [y..(y+height-1)] ]
+boardToString cl (x,y) (height, width) = concat [ (concat [getTileFill (xco, yco) | xco <- [x..(x+width-1)]]) ++ "\n" | yco <- [y..(y+height-1)] ] ++ infodump
     where getTileFill :: (Integer, Integer) -> String
           getTileFill (xTF,yTF) = if Cell xTF yTF True `elem` cl then "██" else "░░"
+          infodump = "\nFieldsize:"++show(width)++"x"++show(height)++" ; from "++show(x)++"|"++show(y)++" to "++show(x+width-1)++"|"++show(y+height-1)

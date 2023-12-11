@@ -30,7 +30,7 @@ playBoardWithRuleSet s = do
     contents <- readFile s
     putStrLn "Enter RuleSet-name (default: defaultRules):"
     rlName <- getLine
-    rlContent <- readFile ("rules/"++rlName++".txt")
+    rlContent <- if rlName == "" then readFile ("rules/defaultRules.txt") else readFile ("rules/"++rlName++".txt")
     playRound (createBoardFromString contents) (-25, -25) (50, 50) (createRuleSetFromString rlContent)
 
 getBoardName:: IO()

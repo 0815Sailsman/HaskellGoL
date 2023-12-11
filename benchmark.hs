@@ -1,11 +1,12 @@
 import GoLAlgorithm
 import Cell
 import System.IO
+import Util
 
 
 main :: IO ()
 main = do
-    contents <- readFile "board1.txt"
+    contents <- readFile "boards/board1.txt"
     playRound (createBoardFromString contents)
 
 
